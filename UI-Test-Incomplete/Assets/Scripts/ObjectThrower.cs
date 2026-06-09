@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 public class ObjectThrower : MonoBehaviour
@@ -20,14 +21,24 @@ public class ObjectThrower : MonoBehaviour
     public float forceMax;
     public float forceSpeed;
     public float distance = 1;
+    NewActions inputs;
+
+    private void Start()
+    {
+        inputs = new NewActions();
+        inputs.Enable();
+
+
+    }
 
 
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetMouseButton(1))
+        if (inputs.Player.Throw.IsPressed())
         {
             force += forceSpeed * Time.deltaTime;
+
             if (force < forceMin)
             {
                 force = forceMin;
@@ -38,27 +49,30 @@ public class ObjectThrower : MonoBehaviour
                 force = forceMax;
                 forceSpeed *= -1;
             }
+            forceIndicator.fillAmount = force * 0.10f;
+
         }
-        else if (Input.GetMouseButtonUp(1))
+        else if (inputs.Player.Throw.WasCompletedThisFrame())
         {
             GameObject temp = Instantiate(objects[selected].obj, transform.position + transform.forward * distance, transform.rotation);
             temp.GetComponent<Rigidbody>().AddForce(transform.forward * force, ForceMode.VelocityChange);
             force = forceMin;
+            forceIndicator.fillAmount = 0f;
         }
         else
         {
             selected += (int)Input.mouseScrollDelta.y;
-            if(selected >= objects.Length)
+            if (selected >= objects.Length)
             {
                 selected = 0;
             }
-            if(selected < 0)
+            if (selected < 0)
             {
                 selected = objects.Length - 1;
             }
             for (int i = 0; i < objects.Length; i++)
             {
-                if(i != selected)
+                if (i != selected)
                 {
                     objects[i].selector.alpha = 0;
                 }
@@ -68,5 +82,6 @@ public class ObjectThrower : MonoBehaviour
                 }
             }
         }
+
     }
 }
